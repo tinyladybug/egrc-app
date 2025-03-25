@@ -34,14 +34,14 @@ class MetricResponse(BaseModel):
     value: float
     description: Optional[str]
     unit: Optional[str]
-    status: str
+    status: Optional[str] = "active"
     warning_threshold: Optional[float]
     limit_threshold: Optional[float]
     risk_type: Optional[str]
     business_unit: Optional[str]
     created_by: Optional[str]
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     
     # @property

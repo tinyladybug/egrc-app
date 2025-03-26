@@ -7,7 +7,7 @@ document.getElementById("metric-form").addEventListener("submit", async (e) => {
     // Collect form data
     const metricData = {
         name: document.getElementById("name").value,
-        value: parseFloat(document.getElementById("value").value),
+        // value: parseFloat(document.getElementById("value").value),
         description: document.getElementById("description").value || null,
         unit: document.getElementById("unit").value || null,
         status: document.getElementById("status").value,

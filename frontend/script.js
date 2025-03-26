@@ -46,7 +46,7 @@ async function fetchMetrics() {
         row.innerHTML = `
             <td>${metric.id}</td> <!-- Display metric ID -->
             <td>${metric.name}</td> <!-- Display metric name -->
-            <td>${metric.value}</td> <!-- Display metric value -->
+            <!-- <td>${metric.value}</td> Display metric value -->
             <td>${metric.unit || "N/A"}</td> <!-- Display unit, or "N/A" if not provided -->
             <td>${metric.status}</td> <!-- Display metric status -->
             <td>${new Date(metric.created_at).toLocaleString()}</td> <!-- Format creation date -->

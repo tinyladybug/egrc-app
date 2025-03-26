@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Metric</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <h1>Create New Metric</h1>
+
+    <form id="metric-form">
+        <label for="name">Metric Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="value">Value:</label>
+        <input type="number" id="value" required>
+
+        <label for="description">Description:</label>
+        <textarea id="description"></textarea>
+
+        <label for="unit">Unit:</label>
+        <input type="text" id="unit">
+
+        <label for="status">Status:</label>
+        <select id="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="archived">Archived</option>
+        </select>
+
+        <label for="warning_threshold">Warning Threshold:</label>
+        <input type="number" id="warning_threshold">
+
+        <label for="limit_threshold">Limit Threshold:</label>
+        <input type="number" id="limit_threshold">
+
+        <label for="risk_type">Risk Type:</label>
+        <input type="text" id="risk_type">
+
+        <label for="business_unit">Business Unit:</label>
+        <input type="text" id="business_unit">
+
+        <label for="created_by">Created By:</label>
+        <input type="text" id="created_by">
+
+        <button class="button-submit">Create Metric</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script src="create_metrics.js"></script>
+    <script src="navbar.js"></script>
+</body>
+</html>

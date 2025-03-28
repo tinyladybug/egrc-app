@@ -21,7 +21,7 @@ class Metric(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())  # Auto update timestamp
     
     # Relationship to MetricResult (1-to-Many)
-    results = relationship("MetricResult", back_populates="metric", order_by="MetricResult.timestamp.desc()", cascade="all, delete-orphan")
+    results = relationship("MetricResult", back_populates="metric", order_by="MetricResult.uploaded_at.desc()", cascade="all, delete-orphan")
     
     @property
     def latest_value(self):
@@ -34,7 +34,8 @@ class MetricResult(Base):
     id = Column(Integer, primary_key=True, index=True)
     metric_id = Column(Integer, ForeignKey("metrics.id", ondelete="CASCADE"), nullable=False)  # Foreign key to Metric
     value = Column(Float, nullable=False)  # Recorded value
-    timestamp = Column(DateTime, default=func.now())  # Timestamp of the result
-
+    uploaded_by = Column(String, nullable=True)  # User who created the metric
+    uploaded_at = Column(DateTime, default=func.now())  # Auto timestamp on creation
+    
     # Relationship back to Metric
     metric = relationship("Metric", back_populates="results")

@@ -5,7 +5,6 @@ from typing import Optional  # Allows fields to be optional
 # Schema for creating a new metric
 class MetricCreate(BaseModel):
     name: str  # Metric name (Required)
-    # value: float  # Metric value (Required)
     description: Optional[str] = None  # Optional: Description of the metric
     unit: Optional[str] = None  # Optional: Unit of measurement (e.g., %, USD, count)
     status: Optional[str] = "active"  # Optional: Default status is "active"
@@ -22,7 +21,6 @@ class MetricCreate(BaseModel):
 class MetricUpdate(BaseModel):
     # All fields are optional to allow partial updates
     name: Optional[str] = None  
-    # value: Optional[float] = None  
     description: Optional[str] = None  
     unit: Optional[str] = None  
     status: Optional[str] = None  
@@ -35,7 +33,6 @@ class MetricUpdate(BaseModel):
 class MetricResponse(BaseModel):
     id: int  # Unique identifier for the metric
     name: str  # Metric name
-    # value: float  # Metric value
     description: Optional[str]  # Optional: Description of the metric
     unit: Optional[str]  # Optional: Unit of measurement
     status: Optional[str] = "active"  # Optional: Status with default value "active"
@@ -52,13 +49,15 @@ class MetricResponse(BaseModel):
 
 # Schema for creating a metric result (Requires metric_id)
 class MetricResultCreate(BaseModel):
-    metric_id: int  # The ID of the metric this result belongs to
+    # id: int  # The ID of the metric this result belongs to
     value: float
+    uploaded_by: Optional[str] = None  # Optional: User who created the metric
 
 
 # Schema for updating a metric result
 class MetricResultUpdate(BaseModel):
     value: Optional[float] = None  # Allows partial updates
+    uploaded_by: Optional[str]  # Optional: User who created the metric
 
 
 # Schema for returning metric results
@@ -66,7 +65,8 @@ class MetricResultResponse(BaseModel):
     id: int
     metric_id: int
     value: float
-    timestamp: datetime
+    uploaded_by: Optional[str] = None  # Optional: User who created the metric
+    uploaded_at: Optional[datetime]  # Timestamp of when the metric was created
 
     class Config:
         from_attributes = True  # Ensures ORM compatibility

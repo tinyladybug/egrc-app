@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
+from datetime import datetime
 
 router = APIRouter()
 
@@ -85,7 +86,7 @@ def delete_metric(id: int, db: Session = Depends(get_db)):
 
 # Create a new metric result
 @router.post("/metrics/{metric_id}/results/", response_model=schemas.MetricResultResponse)
-def create_metric_result(result: schemas.MetricResultCreate, metric_id: int, db: Session = Depends(get_db)):
+def create_metric_result_for_specific_metric(result: schemas.MetricResultCreate, metric_id: int, db: Session = Depends(get_db)):
     # Check if the metric exists
     metric = db.query(models.Metric).filter(models.Metric.id == metric_id).first()
     if not metric:
@@ -94,7 +95,9 @@ def create_metric_result(result: schemas.MetricResultCreate, metric_id: int, db:
     # Create a new MetricResult using the result data
     new_result = models.MetricResult(
         metric_id=metric_id,  # Pass the metric_id explicitly
-        value=result.value
+        value=result.value,
+        uploaded_by=result.uploaded_by,
+
     )
     db.add(new_result)
     db.commit()
@@ -104,26 +107,28 @@ def create_metric_result(result: schemas.MetricResultCreate, metric_id: int, db:
 
 # Get all results for a specific metric
 @router.get("/metrics/{metric_id}/results/", response_model=list[schemas.MetricResultResponse])
-def get_metric_results(metric_id: int, db: Session = Depends(get_db)):
-    results = db.query(models.MetricResult).filter(models.MetricResult.metric_id == metric_id).order_by(models.MetricResult.timestamp.desc()).all()
+def get_all_metric_results_for_specific_metric(metric_id: int, db: Session = Depends(get_db)):
+    results = db.query(models.MetricResult).filter(models.MetricResult.metric_id == metric_id).order_by(models.MetricResult.uploaded_at.desc()).all()
     if not results:
         raise HTTPException(status_code=404, detail="No results found for this metric")
     return results
 
 # Get the latest result for a specific metric
 @router.get("/metrics/{metric_id}/results/latest/", response_model=schemas.MetricResultResponse)
-def get_latest_metric_result(metric_id: int, db: Session = Depends(get_db)):
-    latest_result = db.query(models.MetricResult).filter(models.MetricResult.metric_id == metric_id).order_by(models.MetricResult.timestamp.desc()).first()
+def get_latest_metric_result_for_specific_metric(metric_id: int, db: Session = Depends(get_db)):
+    latest_result = db.query(models.MetricResult).filter(models.MetricResult.metric_id == metric_id).order_by(models.MetricResult.uploaded_at.desc()).first()
     if not latest_result:
         raise HTTPException(status_code=404, detail="No results found for this metric")
     return latest_result
 
 # Update a specific metric result
 @router.put("/results/{result_id}", response_model=schemas.MetricResultResponse)
-def update_metric_result(result_id: int, updated_result: schemas.MetricResultUpdate, db: Session = Depends(get_db)):
+def update_specific_metric_result(result_id: int, updated_result: schemas.MetricResultUpdate, db: Session = Depends(get_db)):
     result = db.query(models.MetricResult).filter(models.MetricResult.id == result_id).first()
     if not result:
         raise HTTPException(status_code=404, detail="Metric result not found")
+    
+    result.uploaded_at = datetime.now()
     
     for key, value in updated_result.model_dump(exclude_unset=True).items():
         setattr(result, key, value)
@@ -134,7 +139,7 @@ def update_metric_result(result_id: int, updated_result: schemas.MetricResultUpd
 
 # Delete a metric result
 @router.delete("/results/{result_id}")
-def delete_metric_result(result_id: int, db: Session = Depends(get_db)):
+def delete_specific_metric_result(result_id: int, db: Session = Depends(get_db)):
     result = db.query(models.MetricResult).filter(models.MetricResult.id == result_id).first()
     if not result:
         raise HTTPException(status_code=404, detail="Metric result not found")
@@ -142,3 +147,21 @@ def delete_metric_result(result_id: int, db: Session = Depends(get_db)):
     db.delete(result)
     db.commit()
     return {"message": "Metric result deleted successfully"}
+
+# Get all metric_results
+@router.get("/results/", response_model=list[schemas.MetricResultResponse])
+def get_all_results(db: Session = Depends(get_db)):
+    metrics_results = db.query(models.MetricResult).all()
+    if not metrics_results:
+        raise HTTPException(status_code=404, detail="No Metric Results found")
+    
+    return [
+        schemas.MetricResultResponse(
+            id=metric_result.id,
+            metric_id=metric_result.metric_id,
+            value=metric_result.value if metric_result.value is not None else 0.0,  # Ensure float value
+            uploaded_by=metric_result.uploaded_by, 
+            uploaded_at=metric_result.uploaded_at, 
+        )
+        for metric_result in metrics_results
+    ]

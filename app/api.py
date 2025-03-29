@@ -22,14 +22,18 @@ def get_metrics(db: Session = Depends(get_db)):
     return [schemas.MetricResponse(
         id=metric.id,
         name=metric.name,
-        value=metric.latest_value if metric.latest_value is not None else 0.0,  # Ensure float value
+        type=metric.type,
+        level=metric.level,
         description=metric.description,
         unit=metric.unit,
         status=metric.status,
         warning_threshold=metric.warning_threshold,
         limit_threshold=metric.limit_threshold,
-        risk_type=metric.risk_type,
-        business_unit=metric.business_unit,
+        risk_type_id=metric.risk_type_id,
+        risk_type=metric.risk_type.name if metric.risk_type.name else None ,
+        business_unit_id=metric.business_unit_id,
+        business_unit=metric.business_unit.name if metric.business_unit.name else None ,
+        latest_value=metric.latest_value if metric.latest_value is not None else 0.0,
         created_by=metric.created_by,
         created_at=metric.created_at,
         updated_at=metric.updated_at
@@ -45,14 +49,18 @@ def get_metric(id: int, db: Session = Depends(get_db)):
     return schemas.MetricResponse(
         id=metric.id,
         name=metric.name,
-        value=metric.latest_value if metric.latest_value is not None else 0.0,
+        type=metric.type,
+        level=metric.level,
         description=metric.description,
         unit=metric.unit,
         status=metric.status,
         warning_threshold=metric.warning_threshold,
         limit_threshold=metric.limit_threshold,
-        risk_type=metric.risk_type,
-        business_unit=metric.business_unit,
+        risk_type_id=metric.risk_type_id,
+        risk_type=metric.risk_type.name if metric.risk_type.name else None ,
+        business_unit_id=metric.business_unit_id,
+        business_unit=metric.business_unit.name if metric.business_unit.name else None ,
+        latest_value=metric.latest_value if metric.latest_value is not None else 0.0,
         created_by=metric.created_by,
         created_at=metric.created_at,
         updated_at=metric.updated_at
@@ -165,3 +173,123 @@ def get_all_results(db: Session = Depends(get_db)):
         )
         for metric_result in metrics_results
     ]
+    
+# ------------------- Risk Type API -------------------
+
+# Create a metric
+@router.post("/risk_types/", response_model=schemas.RiskTypeResponse)
+def create_risk_type(risk_type: schemas.RiskTypeCreate, db: Session = Depends(get_db)):
+    new_risk_type = models.RiskType(**risk_type.model_dump())
+    db.add(new_risk_type)
+    db.commit()
+    db.refresh(new_risk_type)
+    return new_risk_type
+
+# Get all metrics
+@router.get("/risk_types/", response_model=list[schemas.RiskTypeResponse])
+def get_risk_types(db: Session = Depends(get_db)):
+    risk_types = db.query(models.RiskType).all()
+    return [schemas.RiskTypeResponse(
+        id=risk_type.id,
+        level=risk_type.level,
+        status=risk_type.status,
+        name=risk_type.name,
+        description=risk_type.description,
+    ) for risk_type in risk_types]
+
+# Get a single metric by ID
+@router.get("/risk_types/{id}", response_model=schemas.RiskTypeResponse)
+def get_risk_type(id: int, db: Session = Depends(get_db)):
+    risk_type = db.query(models.RiskType).filter(models.RiskType.id == id).first()
+    if risk_type is None:
+        raise HTTPException(status_code=404, detail="Risk Type not found")
+    
+    return schemas.RiskTypeResponse(
+        id=risk_type.id,
+        level=risk_type.level,
+        status=risk_type.status,
+        name=risk_type.name,
+        description=risk_type.description
+    )
+
+# Update a metric
+@router.put("/risk_types/{id}", response_model=schemas.RiskTypeResponse)
+def update_risk_type(id: int, updated_risk_type: schemas.RiskTypeUpdate, db: Session = Depends(get_db)):
+    risk_type = db.query(models.RiskType).filter(models.RiskType.id == id).first()
+    if risk_type is None:
+        raise HTTPException(status_code=404, detail="Risk Type not found")
+    for key, value in updated_risk_type.model_dump(exclude_unset=True).items():
+        setattr(risk_type, key, value)
+    db.commit()
+    db.refresh(risk_type)
+    return risk_type
+
+# Delete a metric
+@router.delete("/risk_types/{id}")
+def delete_risk_type(id: int, db: Session = Depends(get_db)):
+    risk_type = db.query(models.RiskType).filter(models.RiskType.id == id).first()
+    if risk_type is None:
+        raise HTTPException(status_code=404, detail="Risk Type not found")
+    db.delete(risk_type)
+    db.commit()
+    return {"message": "Risk Type deleted successfully"}
+
+# ------------------- Business Unit API -------------------
+
+# Create a metric
+@router.post("/business_units/", response_model=schemas.BusinessUnitResponse)
+def create_business_unit(business_unit: schemas.BusinessUnitCreate, db: Session = Depends(get_db)):
+    new_business_unit = models.BusinessUnit(**business_unit.model_dump())
+    db.add(new_business_unit)
+    db.commit()
+    db.refresh(new_business_unit)
+    return new_business_unit
+
+# Get all metrics
+@router.get("/business_units/", response_model=list[schemas.BusinessUnitResponse])
+def get_business_units(db: Session = Depends(get_db)):
+    business_units = db.query(models.BusinessUnit).all()
+    return [schemas.BusinessUnitResponse(
+        id=business_unit.id,
+        level=business_unit.level,
+        status=business_unit.status,
+        name=business_unit.name,
+        description=business_unit.description,
+    ) for business_unit in business_units]
+
+# Get a single metric by ID
+@router.get("/business_units/{id}", response_model=schemas.BusinessUnitResponse)
+def get_business_unit(id: int, db: Session = Depends(get_db)):
+    business_unit = db.query(models.BusinessUnit).filter(models.BusinessUnit.id == id).first()
+    if business_unit is None:
+        raise HTTPException(status_code=404, detail="Business Unit not found")
+    
+    return schemas.BusinessUnitResponse(
+        id=business_unit.id,
+        level=business_unit.level,
+        status=business_unit.status,
+        name=business_unit.name,
+        description=business_unit.description
+    )
+
+# Update a metric
+@router.put("/business_units/{id}", response_model=schemas.BusinessUnitResponse)
+def update_business_unit(id: int, updated_business_unit: schemas.BusinessUnitUpdate, db: Session = Depends(get_db)):
+    business_unit = db.query(models.BusinessUnit).filter(models.BusinessUnit.id == id).first()
+    if business_unit is None:
+        raise HTTPException(status_code=404, detail="Business Unit not found")
+    for key, value in updated_business_unit.model_dump(exclude_unset=True).items():
+        setattr(business_unit, key, value)
+    db.commit()
+    db.refresh(business_unit)
+    return business_unit
+
+# Delete a metric
+@router.delete("/business_units/{id}")
+def delete_business_unit(id: int, db: Session = Depends(get_db)):
+    business_unit = db.query(models.BusinessUnit).filter(models.BusinessUnit.id == id).first()
+    if business_unit is None:
+        raise HTTPException(status_code=404, detail="Business Unit not found")
+    db.delete(business_unit)
+    db.commit()
+    return {"message": "Business Unit deleted successfully"}

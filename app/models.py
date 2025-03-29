@@ -19,7 +19,7 @@ class Metric(Base):
     # risk_type = Column(String, nullable=True)  # Risk category/type
     risk_type_id = Column(Integer, ForeignKey("risk_types.id"), nullable=False)  # Foreign Key to RiskType
     risk_type = relationship("RiskType", back_populates="metric")  # Establish relationship
-    business_unit = Column(String, nullable=True)  # Business unit related to metric
+    # business_unit = Column(String, nullable=True)  # Business unit related to metric
     business_unit_id = Column(Integer, ForeignKey("business_units.id"), nullable=False)  # Foreign Key to RiskType
     business_unit = relationship("BusinessUnit", back_populates="metric")  # Establish relationship
     created_by = Column(String, nullable=True)  # User who created the metric

@@ -95,6 +95,7 @@ class RiskTypeCreate(BaseModel):
     name: str
     status: Optional[str] = "active"
     description: Optional[str] = None
+    parent_id : Optional[int] = None
     
     # class Config:
     #     from_attributes = True  # Enables compatibility with ORM models (e.g., SQLAlchemy)
@@ -106,6 +107,8 @@ class RiskTypeUpdate(BaseModel):
     name: Optional[str] = None
     status: Optional[str] = None
     description: Optional[str] = None
+    parent_id : Optional[int]
+
     
 # Schema for returning metric data in API responses
 class RiskTypeResponse(BaseModel):
@@ -114,6 +117,7 @@ class RiskTypeResponse(BaseModel):
     name: str  # Metric name
     status: Optional[str] = "Active"  # Optional: Status with default value "active"
     description: Optional[str] = None # Optional: Description of the metric
+    parent_id : Optional[int] = None
 
     class Config:
         from_attributes = True  # Enables ORM conversion (e.g., from SQLAlchemy models)
